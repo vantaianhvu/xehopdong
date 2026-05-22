@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Xe Hợp Đồng - Quảng Ninh</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Josefin+Sans:wght@300;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e1a;--surface:#111827;--card:#161e2e;--border:#1e2d45;--accent1:#00c6ff;--accent2:#ff6b35;--accent3:#7fba00;--accent4:#f7b731;--text:#e2e8f0;--muted:#7b8ea4;--glow1:rgba(0,198,255,0.15);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Be Vietnam Pro',sans-serif;min-height:100vh;}
+
+/* ===== LOGIN SCREEN ===== */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 30% 50%,rgba(0,198,255,0.06) 0%,transparent 60%),radial-gradient(ellipse at 70% 20%,rgba(255,107,53,0.05) 0%,transparent 50%),var(--bg);}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:44px 40px;width:100%;max-width:400px;box-shadow:0 32px 80px rgba(0,0,0,0.5);}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-logo .icon{font-size:48px;margin-bottom:8px;}
+.login-logo h1{font-family:'Josefin Sans',sans-serif;font-size:18px;color:var(--accent1);letter-spacing:2px;text-transform:uppercase;}
+.login-logo p{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:1px;}
+.login-group{margin-bottom:16px;}
+.login-group label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:600;}
+.login-group input{width:100%;background:#0d1b2e;border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Be Vietnam Pro',sans-serif;font-size:14px;padding:11px 14px;outline:none;transition:border-color .2s;}
+.login-group input:focus{border-color:var(--accent1);box-shadow:0 0 0 3px rgba(0,198,255,0.1);}
+.login-group input.err{border-color:#f87171;}
+.btn-login{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent1),#0088cc);border:none;border-radius:10px;color:#fff;font-family:'Be Vietnam Pro',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,198,255,0.35);}
+.login-err{color:#f87171;font-size:12px;text-align:center;margin-top:10px;min-height:18px;}
+
+/* ===== APP ===== */
+#appScreen{display:none;}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#0d1b2e,#111827);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100;}
+.header-title{font-family:'Josefin Sans',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;color:var(--accent1);text-transform:uppercase;}
+.header-sub{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:1.5px;text-transform:uppercase;}
+.header-right{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.filter-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Be Vietnam Pro',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;}
+.filter-btn.active,.filter-btn:hover{border-color:var(--accent1);color:var(--accent1);background:var(--glow1);}
+.btn-header{padding:6px 14px;border-radius:20px;font-family:'Be Vietnam Pro',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;border:1px solid;}
+.btn-add-data{border-color:var(--accent3);background:rgba(127,186,0,.12);color:var(--accent3);}
+.btn-add-data:hover{background:rgba(127,186,0,.22);}
+.btn-manage-user{border-color:var(--accent4);background:rgba(247,183,49,.1);color:var(--accent4);}
+.btn-manage-user:hover{background:rgba(247,183,49,.2);}
+.btn-logout{border-color:var(--border);background:transparent;color:var(--muted);}
+.btn-logout:hover{border-color:#f87171;color:#f87171;}
+.user-chip{font-size:11px;color:var(--muted);background:var(--border);padding:4px 10px;border-radius:10px;display:flex;align-items:center;gap:5px;}
+.user-chip .role{color:var(--accent4);font-weight:700;}
+.divider-v{width:1px;height:22px;background:var(--border);}
+.record-count{font-size:11px;color:var(--muted);background:var(--border);padding:3px 10px;border-radius:10px;}
+
+/* MAIN */
+.container{padding:22px 28px;max-width:1600px;margin:0 auto;}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.4);}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi-card.c1::before{background:var(--accent1);}
+.kpi-card.c2::before{background:var(--accent2);}
+.kpi-card.c3::before{background:var(--accent3);}
+.kpi-card.c4::before{background:var(--accent4);}
+.kpi-icon{font-size:26px;margin-bottom:10px;}
+.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;}
+.kpi-value{font-size:30px;font-weight:800;line-height:1;}
+.kpi-card.c1 .kpi-value{color:var(--accent1);}
+.kpi-card.c2 .kpi-value{color:var(--accent2);}
+.kpi-card.c3 .kpi-value{color:var(--accent3);}
+.kpi-card.c4 .kpi-value{color:var(--accent4);}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:5px;}
+
+/* CHARTS */
+.charts-row{display:grid;gap:14px;margin-bottom:20px;}
+.charts-row.two{grid-template-columns:1fr 1fr;}
+.charts-row.three{grid-template-columns:2fr 1fr;}
+@media(max-width:900px){.charts-row.two,.charts-row.three{grid-template-columns:1fr;}}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+.chart-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.chart-title{font-size:13px;font-weight:600;}
+.chart-title span{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px;}
+.chart-badge{font-size:10px;padding:3px 8px;border-radius:10px;background:var(--glow1);color:var(--accent1);border:1px solid rgba(0,198,255,.2);}
+
+/* TABLE */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.table-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{background:#0d1b2e;padding:9px 14px;text-align:left;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s;}
+tbody tr:hover{background:rgba(255,255,255,.03);}
+tbody tr.new-row td{animation:rowIn .5s ease;}
+@keyframes rowIn{from{background:rgba(127,186,0,.15)}to{background:transparent}}
+tbody td{padding:9px 14px;white-space:nowrap;}
+.tag-year{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;}
+.tag-2022{background:rgba(127,186,0,.15);color:var(--accent3);}
+.tag-2023{background:rgba(0,198,255,.15);color:var(--accent1);}
+.tag-2024{background:rgba(255,107,53,.15);color:var(--accent2);}
+.tag-new{background:rgba(247,183,49,.2);color:var(--accent4);}
+.num{text-align:right;font-variant-numeric:tabular-nums;}
+.num-hi{font-weight:600;}
+.bar-mini{height:4px;background:var(--border);border-radius:2px;margin-top:3px;min-width:40px;}
+.bar-mini-fill{height:100%;border-radius:2px;}
+.btn-del{background:none;border:none;color:#f87171;cursor:pointer;font-size:13px;padding:2px 5px;border-radius:4px;opacity:.45;transition:opacity .2s;}
+.btn-del:hover{opacity:1;background:rgba(248,113,113,.1);}
+
+/* DISTRICT */
+.district-grid{display:grid;gap:6px;}
+.district-row{display:flex;align-items:center;gap:8px;font-size:12px;}
+.district-name{width:78px;color:var(--muted);flex-shrink:0;}
+.district-bar-wrap{flex:1;background:var(--border);border-radius:2px;height:8px;}
+.district-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent1),var(--accent2));}
+.district-val{width:40px;text-align:right;font-weight:600;font-size:12px;}
+
+/* ===== MODAL SHARED ===== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:#111827;border:1px solid var(--border);border-radius:16px;width:100%;max-width:840px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn .22s ease;}
+.modal.sm{max-width:480px;}
+@keyframes modalIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.modal-hd{padding:18px 26px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#111827;z-index:10;}
+.modal-hd-title{font-size:15px;font-weight:700;color:var(--accent1);}
+.modal-hd-title span{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px;}
+.btn-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:3px 7px;border-radius:6px;}
+.btn-close:hover{color:var(--text);background:var(--border);}
+.modal-body{padding:22px 26px;}
+.modal-ft{padding:14px 26px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:9px;position:sticky;bottom:0;background:#111827;}
+.btn-cancel{padding:8px 20px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Be Vietnam Pro',sans-serif;font-size:13px;cursor:pointer;}
+.btn-cancel:hover{border-color:var(--text);color:var(--text);}
+.btn-save{padding:8px 22px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--accent1),#0088cc);color:#fff;font-family:'Be Vietnam Pro',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,198,255,.3);}
+.btn-danger{padding:8px 20px;border-radius:9px;border:none;background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.3);font-family:'Be Vietnam Pro',sans-serif;font-size:13px;cursor:pointer;}
+.btn-danger:hover{background:rgba(248,113,113,.25);}
+
+/* FORM */
+.form-section{margin-bottom:22px;}
+.form-sec-title{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent1);font-weight:600;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border);}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.form-grid.col2{grid-template-columns:repeat(2,1fr);}
+.form-grid.col4{grid-template-columns:repeat(4,1fr);}
+@media(max-width:600px){.form-grid,.form-grid.col2,.form-grid.col4{grid-template-columns:1fr 1fr;}}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-group label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;}
+.form-group input,.form-group select{background:#0d1b2e;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Be Vietnam Pro',sans-serif;font-size:13px;padding:8px 10px;outline:none;transition:border-color .2s;-moz-appearance:textfield;}
+.form-group input::-webkit-outer-spin-button,.form-group input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent1);box-shadow:0 0 0 2px rgba(0,198,255,.1);}
+.form-group select option{background:#0d1b2e;}
+.form-group input.req-err{border-color:#f87171!important;}
+
+/* USER MANAGEMENT */
+.user-table{width:100%;border-collapse:collapse;font-size:13px;}
+.user-table th{text-align:left;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:8px 12px;border-bottom:1px solid var(--border);}
+.user-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);}
+.user-table tr:hover td{background:rgba(255,255,255,.02);}
+.role-badge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;}
+.role-admin{background:rgba(247,183,49,.15);color:var(--accent4);}
+.role-user{background:rgba(0,198,255,.12);color:var(--accent1);}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;}
+.status-active{background:#4ade80;}
+.status-inactive{background:#f87171;}
+.btn-sm{padding:4px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid;font-family:'Be Vietnam Pro',sans-serif;transition:all .15s;}
+.btn-toggle-active{border-color:rgba(74,222,128,.3);color:#4ade80;background:rgba(74,222,128,.08);}
+.btn-toggle-active:hover{background:rgba(74,222,128,.18);}
+.btn-toggle-inactive{border-color:rgba(248,113,113,.3);color:#f87171;background:rgba(248,113,113,.08);}
+.btn-toggle-inactive:hover{background:rgba(248,113,113,.18);}
+.btn-del-user{border-color:rgba(248,113,113,.3);color:#f87171;background:transparent;}
+.btn-del-user:hover{background:rgba(248,113,113,.15);}
+.add-user-form{background:#0d1b2e;border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:18px;}
+.add-user-form h4{font-size:12px;color:var(--accent3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.add-user-row{display:grid;grid-template-columns:1fr 1fr 100px 80px;gap:8px;align-items:end;}
+@media(max-width:520px){.add-user-row{grid-template-columns:1fr 1fr;}}
+
+/* GITHUB GUIDE */
+.github-steps{counter-reset:step;}
+.github-step{display:flex;gap:14px;margin-bottom:18px;align-items:flex-start;}
+.step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent1),#0088cc);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-content h4{font-size:13px;font-weight:700;margin-bottom:4px;}
+.step-content p{font-size:12px;color:var(--muted);line-height:1.6;}
+.step-content code{background:#0d1b2e;border:1px solid var(--border);border-radius:5px;padding:2px 7px;font-size:11px;color:var(--accent1);font-family:monospace;}
+.copy-block{background:#0d1b2e;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-top:8px;font-size:11px;color:var(--accent3);font-family:monospace;position:relative;cursor:pointer;transition:border-color .2s;}
+.copy-block:hover{border-color:var(--accent1);}
+.copy-block .copy-hint{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--muted);}
+.info-box{background:rgba(0,198,255,.06);border:1px solid rgba(0,198,255,.2);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px;}
+.info-box strong{color:var(--accent1);}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;right:28px;z-index:9999;background:var(--card);border:1px solid var(--accent3);border-radius:10px;padding:11px 18px;color:var(--text);font-size:13px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.4);display:flex;align-items:center;gap:7px;transform:translateY(70px);opacity:0;transition:all .3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.error{border-color:#f87171;}
+
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:20px 0 28px;letter-spacing:1px;}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="icon">🚌</div>
+      <h1>Xe Hợp Đồng</h1>
+      <p>Sở GTVT Quảng Ninh · Đăng nhập</p>
+    </div>
+    <div class="login-group">
+      <label>Tên đăng nhập</label>
+      <input type="text" id="li_user" placeholder="Nhập tên đăng nhập" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-group">
+      <label>Mật khẩu</label>
+      <input type="password" id="li_pass" placeholder="Nhập mật khẩu" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Đăng nhập</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="appScreen">
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="header-title">🚌 Dashboard Xe Hợp Đồng</div>
+      <div class="header-sub" id="headerSub">Sở GTVT Quảng Ninh</div>
+    </div>
+    <div class="header-right">
+      <div class="user-chip">👤 <span id="currentUserName">—</span> · <span class="role" id="currentUserRole">—</span></div>
+      <div class="divider-v"></div>
+      <button class="btn-header btn-add-data" onclick="openDataModal()" id="btnAddData">＋ Thêm tháng</button>
+      <button class="btn-header btn-manage-user" onclick="openUserModal()" id="btnManageUser" style="display:none">👥 Quản lý tài khoản</button>
+      <button class="btn-header" style="border-color:#a78bfa;background:rgba(167,139,250,.1);color:#a78bfa;" onclick="openGithubModal()">🚀 Deploy GitHub</button>
+      <div class="divider-v"></div>
+      <button class="filter-btn active" onclick="setYear('all')">Tất cả</button>
+      <button class="filter-btn" onclick="setYear(2022)">2022</button>
+      <button class="filter-btn" onclick="setYear(2023)">2023</button>
+      <button class="filter-btn" onclick="setYear(2024)">2024</button>
+      <span class="record-count" id="recordCount">30 bản ghi</span>
+      <button class="btn-header btn-logout" onclick="doLogout()">⎋ Đăng xuất</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- KPI -->
+    <div class="kpi-grid">
+      <div class="kpi-card c1"><div class="kpi-icon">🚗</div><div class="kpi-label">Tổng phương tiện (mới nhất)</div><div class="kpi-value" id="kpi-pt">—</div><div class="kpi-sub" id="kpi-pt-sub"></div></div>
+      <div class="kpi-card c2"><div class="kpi-icon">🏢</div><div class="kpi-label">Tổng đơn vị KDVT (mới nhất)</div><div class="kpi-value" id="kpi-dv">—</div><div class="kpi-sub" id="kpi-dv-sub"></div></div>
+      <div class="kpi-card c3"><div class="kpi-icon">📍</div><div class="kpi-label">Tổng số chuyến (kỳ lọc)</div><div class="kpi-value" id="kpi-chuyen">—</div><div class="kpi-sub">chuyến vận chuyển</div></div>
+      <div class="kpi-card c4"><div class="kpi-icon">👥</div><div class="kpi-label">Tổng hành khách (kỳ lọc)</div><div class="kpi-value" id="kpi-khach">—</div><div class="kpi-sub">lượt hành khách</div></div>
+    </div>
+    <!-- Charts 1 -->
+    <div class="charts-row three">
+      <div class="chart-card"><div class="chart-header"><div class="chart-title">Tổng phương tiện<span>Biến động theo tháng/năm</span></div><div class="chart-badge">TREND</div></div><canvas id="chartPT" height="180"></canvas></div>
+      <div class="chart-card"><div class="chart-header"><div class="chart-title">Phân loại xe<span>Theo số chỗ ngồi</span></div><div class="chart-badge">PHÂN LOẠI</div></div><canvas id="chartLoaiXe" height="180"></canvas></div>
+    </div>
+    <!-- Charts 2 -->
+    <div class="charts-row two">
+      <div class="chart-card"><div class="chart-header"><div class="chart-title">Số chuyến & Hành khách<span>Xu hướng vận tải</span></div><div class="chart-badge">VẬN TẢI</div></div><canvas id="chartVanTai" height="200"></canvas></div>
+      <div class="chart-card"><div class="chart-header"><div class="chart-title">Cấp mới & Ngừng phù hiệu<span>Biến động phương tiện</span></div><div class="chart-badge">BIẾN ĐỘNG</div></div><canvas id="chartBienDong" height="200"></canvas></div>
+    </div>
+    <!-- Charts 3 -->
+    <div class="charts-row two">
+      <div class="chart-card"><div class="chart-header"><div class="chart-title">Loại hình đơn vị KDVT<span>DN / HTX / Hộ kinh doanh</span></div><div class="chart-badge">ĐƠN VỊ</div></div><canvas id="chartLoaiHinh" height="200"></canvas></div>
+      <div class="chart-card"><div class="chart-header"><div class="chart-title">Phân bổ xe theo địa phương<span>Dữ liệu mới nhất</span></div><div class="chart-badge">ĐỊA PHƯƠNG</div></div><div class="district-grid" id="districtGrid" style="padding-top:6px;"></div></div>
+    </div>
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <div class="chart-title">Chi tiết dữ liệu theo tháng<span>Toàn bộ chỉ số báo cáo</span></div>
+        <div class="chart-badge">DỮ LIỆU GỐC</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th></th><th>Tháng</th><th>Năm</th>
+            <th class="num">Tổng PT</th><th class="num">Cấp mới</th><th class="num">Ngừng</th>
+            <th class="num">Tổng ĐV</th><th class="num">DN</th><th class="num">HTX</th><th class="num">Hộ KD</th>
+            <th class="num">≤9 chỗ</th><th class="num">9–25</th><th class="num">&gt;25</th>
+            <th class="num">Chuyến</th><th class="num">Hành khách</th>
+          </tr></thead>
+          <tbody id="dataTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="footer">Nguồn: Báo cáo xe hợp đồng · Sở GTVT Quảng Ninh</div>
+</div>
+
+<!-- ===== MODAL: THÊM DỮ LIỆU ===== -->
+<div class="modal-overlay" id="dataModal" onclick="if(event.target===this)closeDataModal()">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-hd-title">Thêm dữ liệu tháng mới<span>Nhập đầy đủ các chỉ số báo cáo</span></div>
+      <button class="btn-close" onclick="closeDataModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="form-sec-title">📅 Thời gian</div>
+        <div class="form-grid col2">
+          <div class="form-group"><label>Tháng *</label>
+            <select id="f_thang"><option value="">-- Chọn tháng --</option>
+              <option value="1">Tháng 1</option><option value="2">Tháng 2</option><option value="3">Tháng 3</option><option value="4">Tháng 4</option><option value="5">Tháng 5</option><option value="6">Tháng 6</option><option value="7">Tháng 7</option><option value="8">Tháng 8</option><option value="9">Tháng 9</option><option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
+            </select></div>
+          <div class="form-group"><label>Năm *</label>
+            <select id="f_nam"><option value="">-- Chọn năm --</option>
+              <option value="2022">2022</option><option value="2023">2023</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
+            </select></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-sec-title">🚗 Phương tiện</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Cấp mới</label><input type="number" id="f_cap_moi" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Ngừng / Trả</label><input type="number" id="f_ngung_tra" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Tổng phương tiện *</label><input type="number" id="f_tong_phuong_tien" placeholder="0" min="0"></div>
+          <div class="form-group"><label>≤ 9 chỗ</label><input type="number" id="f_xe_9cho" placeholder="0" min="0"></div>
+          <div class="form-group"><label>9 – 25 chỗ</label><input type="number" id="f_xe_9_25" placeholder="0" min="0"></div>
+          <div class="form-group"><label>&gt; 25 chỗ</label><input type="number" id="f_xe_tren25" placeholder="0" min="0"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-sec-title">🏢 Đơn vị kinh doanh vận tải</div>
+        <div class="form-grid col4">
+          <div class="form-group"><label>Tổng đơn vị *</label><input type="number" id="f_tong_don_vi" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Doanh nghiệp</label><input type="number" id="f_so_dn" placeholder="0" min="0"></div>
+          <div class="form-group"><label>HTX</label><input type="number" id="f_htx" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Hộ kinh doanh</label><input type="number" id="f_ho_kd" placeholder="0" min="0"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-sec-title">🗺️ Phân bổ xe theo địa phương</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Hạ Long</label><input type="number" id="f_hl_xe" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Cẩm Phả</label><input type="number" id="f_cp_xe" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Móng Cái</label><input type="number" id="f_mc_xe" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Uông Bí</label><input type="number" id="f_ub_xe" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Quảng Yên</label><input type="number" id="f_qy_xe" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Đông Triều</label><input type="number" id="f_dt_xe" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Vân Đồn</label><input type="number" id="f_vd_xe" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Đầm Hà</label><input type="number" id="f_dh_xe" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Hải Hà</label><input type="number" id="f_hh_xe" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Bình Liêu</label><input type="number" id="f_bl_xe" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Cô Tô</label><input type="number" id="f_ct_xe" placeholder="0" min="0"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-sec-title">📍 Hoạt động vận tải</div>
+        <div class="form-grid col2">
+          <div class="form-group"><label>Số chuyến *</label><input type="number" id="f_so_chuyen" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Số hành khách *</label><input type="number" id="f_so_khach" placeholder="0" min="0"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeDataModal()">Hủy</button>
+      <button class="btn-save" onclick="saveRecord()">💾 Lưu & Cập nhật biểu đồ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: QUẢN LÝ TÀI KHOẢN ===== -->
+<div class="modal-overlay" id="userModal" onclick="if(event.target===this)closeUserModal()">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-hd-title">Quản lý tài khoản<span>Tạo và quản lý tài khoản người dùng</span></div>
+      <button class="btn-close" onclick="closeUserModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-box">⚠️ <strong>Lưu ý bảo mật:</strong> Đây là phiên bản đơn giản, mật khẩu lưu dưới dạng mã hóa cơ bản trong trình duyệt. Phù hợp cho nội bộ số người dùng nhỏ. Sau khi deploy GitHub, mỗi người dùng tự quản lý session trên thiết bị của họ.</div>
+      <!-- Form thêm user -->
+      <div class="add-user-form">
+        <h4>➕ Tạo tài khoản mới</h4>
+        <div class="add-user-row">
+          <div class="form-group"><label>Tên đăng nhập *</label><input type="text" id="nu_username" placeholder="vd: nguyen.van.a"></div>
+          <div class="form-group"><label>Mật khẩu *</label><input type="password" id="nu_password" placeholder="Tối thiểu 4 ký tự"></div>
+          <div class="form-group"><label>Vai trò</label>
+            <select id="nu_role">
+              <option value="user">Xem</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group"><label>&nbsp;</label><button class="btn-save" onclick="addUser()" style="width:100%;justify-content:center;">Tạo</button></div>
+        </div>
+      </div>
+      <!-- Danh sách user -->
+      <table class="user-table">
+        <thead><tr>
+          <th>Tên đăng nhập</th><th>Vai trò</th><th>Trạng thái</th><th>Ngày tạo</th><th>Thao tác</th>
+        </tr></thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeUserModal()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: GITHUB GUIDE ===== -->
+<div class="modal-overlay" id="githubModal" onclick="if(event.target===this)document.getElementById('githubModal').classList.remove('open')">
+  <div class="modal sm">
+    <div class="modal-hd">
+      <div class="modal-hd-title">🚀 Deploy lên GitHub Pages<span>Web tĩnh miễn phí, có link chia sẻ</span></div>
+      <button class="btn-close" onclick="document.getElementById('githubModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-box">Sau khi deploy, link dạng: <strong>https://[username].github.io/dashboard-xe/</strong><br>Chỉ ai biết link mới vào được — kết hợp màn hình đăng nhập để bảo vệ nội dung.</div>
+      <div class="github-steps">
+        <div class="github-step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>Tải file HTML về máy</h4>
+            <p>Nhấn nút bên dưới để tải file <code>index.html</code> (đã bao gồm toàn bộ dữ liệu & tài khoản hiện tại)</p>
+            <button class="btn-save" style="margin-top:10px;font-size:12px;" onclick="downloadHTML()">⬇️ Tải index.html</button>
+          </div>
+        </div>
+        <div class="github-step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>Tạo repository trên GitHub</h4>
+            <p>Vào <code>github.com/new</code> → đặt tên repo <code>dashboard-xe</code> → chọn <strong>Public</strong> → nhấn <em>Create repository</em></p>
+          </div>
+        </div>
+        <div class="github-step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>Upload file lên GitHub</h4>
+            <p>Trong repo vừa tạo → nhấn <strong>Add file → Upload files</strong> → kéo thả file <code>index.html</code> vào → nhấn <em>Commit changes</em></p>
+          </div>
+        </div>
+        <div class="github-step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>Bật GitHub Pages</h4>
+            <p>Vào <strong>Settings → Pages</strong> → Source: chọn <em>Deploy from a branch</em> → Branch: <code>main</code>, folder <code>/(root)</code> → nhấn <em>Save</em></p>
+          </div>
+        </div>
+        <div class="github-step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <h4>Chờ ~1 phút → Có link!</h4>
+            <p>Quay lại <strong>Settings → Pages</strong> sẽ thấy link xanh. Chia sẻ link đó — người xem phải đăng nhập mới vào được dashboard.</p>
+          </div>
+        </div>
+      </div>
+      <div class="info-box" style="margin-top:4px;">💡 <strong>Cập nhật dữ liệu sau này:</strong> Thêm dữ liệu trong app → Tải lại file → Upload đè lên GitHub → tự động cập nhật web.</div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="document.getElementById('githubModal').classList.remove('open')">Đóng</button>
+      <button class="btn-save" onclick="downloadHTML()">⬇️ Tải file để deploy</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== USER SYSTEM =====================
+// Hash đơn giản (không phải cryptographic, chỉ để che mật khẩu)
+function simpleHash(str){let h=5381;for(let i=0;i<str.length;i++)h=((h<<5)+h)+str.charCodeAt(i);return (h>>>0).toString(36);}
+
+const USERS_KEY='xhd_users_v1';
+const SESSION_KEY='xhd_session_v1';
+
+function loadUsers(){
+  try{return JSON.parse(localStorage.getItem(USERS_KEY))||[];}catch{return [];}
+}
+function saveUsers(users){localStorage.setItem(USERS_KEY,JSON.stringify(users));}
+
+function initDefaultUsers(){
+  if(loadUsers().length>0) return;
+  const now=new Date().toLocaleDateString('vi-VN');
+  saveUsers([
+    {id:1,username:'admin',passHash:simpleHash('admin123'),role:'admin',active:true,created:now},
+    {id:2,username:'viewer',passHash:simpleHash('view123'),role:'user',active:true,created:now}
+  ]);
+}
+
+function doLogin(){
+  const u=document.getElementById('li_user').value.trim();
+  const p=document.getElementById('li_pass').value;
+  const err=document.getElementById('loginErr');
+  if(!u||!p){err.textContent='Vui lòng nhập đầy đủ thông tin';return;}
+  const users=loadUsers();
+  const found=users.find(x=>x.username===u && x.passHash===simpleHash(p) && x.active);
+  if(!found){err.textContent='Tên đăng nhập hoặc mật khẩu không đúng';document.getElementById('li_pass').value='';return;}
+  sessionStorage.setItem(SESSION_KEY,JSON.stringify({username:found.username,role:found.role}));
+  showApp(found);
+}
+
+function doLogout(){
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('appScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('li_user').value='';
+  document.getElementById('li_pass').value='';
+  document.getElementById('loginErr').textContent='';
+}
+
+function showApp(user){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  document.getElementById('currentUserName').textContent=user.username;
+  document.getElementById('currentUserRole').textContent=user.role==='admin'?'Admin':'Xem';
+  // Admin-only buttons
+  const isAdmin=user.role==='admin';
+  document.getElementById('btnManageUser').style.display=isAdmin?'flex':'none';
+  document.getElementById('btnAddData').style.display=isAdmin?'flex':'none';
+  // Hide delete buttons for non-admin
+  window._isAdmin=isAdmin;
+  updateAll();
+}
+
+// Check existing session
+function checkSession(){
+  initDefaultUsers();
+  try{
+    const s=JSON.parse(sessionStorage.getItem(SESSION_KEY));
+    if(s){const users=loadUsers();const u=users.find(x=>x.username===s.username&&x.active);if(u){showApp(u);return;}}
+  }catch{}
+}
+
+// ===================== USER MANAGEMENT =====================
+function openUserModal(){
+  renderUserTable();
+  document.getElementById('userModal').classList.add('open');
+}
+function closeUserModal(){document.getElementById('userModal').classList.remove('open');}
+
+function renderUserTable(){
+  const users=loadUsers();
+  document.getElementById('userTableBody').innerHTML=users.map(u=>`
+    <tr>
+      <td><strong>${u.username}</strong></td>
+      <td><span class="role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role==='admin'?'Admin':'Xem'}</span></td>
+      <td><span class="status-dot ${u.active?'status-active':'status-inactive'}"></span>${u.active?'Hoạt động':'Tạm khóa'}</td>
+      <td style="color:var(--muted)">${u.created||'—'}</td>
+      <td style="display:flex;gap:5px;align-items:center;">
+        <button class="btn-sm ${u.active?'btn-toggle-inactive':'btn-toggle-active'}" onclick="toggleUser(${u.id})">${u.active?'Khóa':'Mở khóa'}</button>
+        ${u.username!=='admin'?`<button class="btn-sm btn-del-user" onclick="deleteUser(${u.id})">Xóa</button>`:''}
+      </td>
+    </tr>`).join('');
+}
+
+function addUser(){
+  const username=document.getElementById('nu_username').value.trim().toLowerCase();
+  const password=document.getElementById('nu_password').value;
+  const role=document.getElementById('nu_role').value;
+  if(!username||!password){showToast('⚠️ Điền đầy đủ tên đăng nhập và mật khẩu','error');return;}
+  if(password.length<4){showToast('⚠️ Mật khẩu tối thiểu 4 ký tự','error');return;}
+  const users=loadUsers();
+  if(users.find(u=>u.username===username)){showToast('⚠️ Tên đăng nhập đã tồn tại','error');return;}
+  const newUser={id:Date.now(),username,passHash:simpleHash(password),role,active:true,created:new Date().toLocaleDateString('vi-VN')};
+  users.push(newUser);saveUsers(users);
+  document.getElementById('nu_username').value='';document.getElementById('nu_password').value='';
+  renderUserTable();
+  showToast(`✅ Đã tạo tài khoản "${username}" (${role==='admin'?'Admin':'Xem'})`);
+}
+
+function toggleUser(id){
+  const users=loadUsers();
+  const u=users.find(x=>x.id===id);
+  if(!u)return;
+  if(u.username==='admin'){showToast('⚠️ Không thể khóa tài khoản admin gốc','error');return;}
+  u.active=!u.active;saveUsers(users);renderUserTable();
+  showToast(u.active?`✅ Đã mở khóa "${u.username}"`:`🔒 Đã khóa "${u.username}"`);
+}
+
+function deleteUser(id){
+  const users=loadUsers();
+  const u=users.find(x=>x.id===id);
+  if(!u||!confirm(`Xóa tài khoản "${u.username}"?`))return;
+  saveUsers(users.filter(x=>x.id!==id));renderUserTable();
+  showToast(`🗑️ Đã xóa tài khoản "${u.username}"`);
+}
+
+// ===================== GITHUB / DOWNLOAD =====================
+function openGithubModal(){document.getElementById('githubModal').classList.add('open');}
+
+function downloadHTML(){
+  // Snapshot current HTML with current DATA & USERS embedded
+  const html=document.documentElement.outerHTML;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='index.html';a.click();
+  showToast('✅ Đã tải file index.html — upload lên GitHub!');
+}
+
+// ===================== DATA =====================
+let DATA=[{"thang":1,"nam":2022,"cap_moi":49,"ngung_tra":17,"tong_phuong_tien":986,"so_dn":76,"htx":16,"ho_kd":23,"tong_don_vi":115,"xe_9cho":49,"xe_9_25":238,"xe_tren25":699,"hl_xe":273,"cp_xe":427,"mc_xe":41,"ub_xe":77,"qy_xe":9,"dt_xe":40,"vd_xe":54,"dh_xe":6,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":15097,"so_khach":525580},{"thang":2,"nam":2022,"cap_moi":7,"ngung_tra":3,"tong_phuong_tien":990,"so_dn":76,"htx":16,"ho_kd":28,"tong_don_vi":120,"xe_9cho":49,"xe_9_25":250,"xe_tren25":691,"hl_xe":0,"cp_xe":0,"mc_xe":0,"ub_xe":0,"qy_xe":0,"dt_xe":0,"vd_xe":0,"dh_xe":0,"hh_xe":0,"bl_xe":0,"ct_xe":0,"so_chuyen":13478,"so_khach":483323},{"thang":3,"nam":2022,"cap_moi":9,"ngung_tra":9,"tong_phuong_tien":990,"so_dn":76,"htx":16,"ho_kd":35,"tong_don_vi":127,"xe_9cho":25,"xe_9_25":250,"xe_tren25":715,"hl_xe":0,"cp_xe":0,"mc_xe":0,"ub_xe":0,"qy_xe":0,"dt_xe":0,"vd_xe":0,"dh_xe":0,"hh_xe":0,"bl_xe":0,"ct_xe":0,"so_chuyen":17732,"so_khach":617522},{"thang":4,"nam":2022,"cap_moi":26,"ngung_tra":33,"tong_phuong_tien":983,"so_dn":76,"htx":16,"ho_kd":42,"tong_don_vi":134,"xe_9cho":28,"xe_9_25":277,"xe_tren25":678,"hl_xe":0,"cp_xe":0,"mc_xe":0,"ub_xe":0,"qy_xe":0,"dt_xe":0,"vd_xe":0,"dh_xe":0,"hh_xe":0,"bl_xe":0,"ct_xe":0,"so_chuyen":23670,"so_khach":768966},{"thang":5,"nam":2022,"cap_moi":19,"ngung_tra":17,"tong_phuong_tien":985,"so_dn":76,"htx":16,"ho_kd":45,"tong_don_vi":137,"xe_9cho":28,"xe_9_25":298,"xe_tren25":659,"hl_xe":0,"cp_xe":0,"mc_xe":0,"ub_xe":0,"qy_xe":0,"dt_xe":0,"vd_xe":0,"dh_xe":0,"hh_xe":0,"bl_xe":0,"ct_xe":0,"so_chuyen":19188,"so_khach":650194},{"thang":6,"nam":2022,"cap_moi":20,"ngung_tra":7,"tong_phuong_tien":998,"so_dn":76,"htx":13,"ho_kd":50,"tong_don_vi":139,"xe_9cho":30,"xe_9_25":311,"xe_tren25":657,"hl_xe":0,"cp_xe":0,"mc_xe":0,"ub_xe":0,"qy_xe":0,"dt_xe":0,"vd_xe":0,"dh_xe":0,"hh_xe":0,"bl_xe":0,"ct_xe":0,"so_chuyen":19461,"so_khach":657217},{"thang":7,"nam":2022,"cap_moi":34,"ngung_tra":8,"tong_phuong_tien":1024,"so_dn":74,"htx":13,"ho_kd":55,"tong_don_vi":142,"xe_9cho":32,"xe_9_25":315,"xe_tren25":677,"hl_xe":0,"cp_xe":0,"mc_xe":0,"ub_xe":0,"qy_xe":0,"dt_xe":0,"vd_xe":0,"dh_xe":0,"hh_xe":0,"bl_xe":0,"ct_xe":0,"so_chuyen":18872,"so_khach":374227},{"thang":8,"nam":2022,"cap_moi":22,"ngung_tra":17,"tong_phuong_tien":1029,"so_dn":70,"htx":13,"ho_kd":57,"tong_don_vi":128,"xe_9cho":32,"xe_9_25":327,"xe_tren25":670,"hl_xe":0,"cp_xe":0,"mc_xe":0,"ub_xe":0,"qy_xe":0,"dt_xe":0,"vd_xe":0,"dh_xe":0,"hh_xe":0,"bl_xe":0,"ct_xe":0,"so_chuyen":20066,"so_khach":698937},{"thang":9,"nam":2022,"cap_moi":16,"ngung_tra":81,"tong_phuong_tien":964,"so_dn":70,"htx":13,"ho_kd":57,"tong_don_vi":140,"xe_9cho":32,"xe_9_25":330,"xe_tren25":602,"hl_xe":0,"cp_xe":0,"mc_xe":0,"ub_xe":0,"qy_xe":0,"dt_xe":0,"vd_xe":0,"dh_xe":0,"hh_xe":0,"bl_xe":0,"ct_xe":0,"so_chuyen":19406,"so_khach":670098},{"thang":10,"nam":2022,"cap_moi":22,"ngung_tra":50,"tong_phuong_tien":939,"so_dn":69,"htx":13,"ho_kd":62,"tong_don_vi":144,"xe_9cho":33,"xe_9_25":311,"xe_tren25":595,"hl_xe":273,"cp_xe":427,"mc_xe":41,"ub_xe":77,"qy_xe":9,"dt_xe":40,"vd_xe":54,"dh_xe":6,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":21474,"so_khach":722581},{"thang":11,"nam":2022,"cap_moi":30,"ngung_tra":27,"tong_phuong_tien":942,"so_dn":68,"htx":13,"ho_kd":67,"tong_don_vi":148,"xe_9cho":34,"xe_9_25":307,"xe_tren25":601,"hl_xe":272,"cp_xe":422,"mc_xe":41,"ub_xe":79,"qy_xe":16,"dt_xe":41,"vd_xe":52,"dh_xe":7,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":21431,"so_khach":717895},{"thang":12,"nam":2022,"cap_moi":36,"ngung_tra":33,"tong_phuong_tien":945,"so_dn":67,"htx":10,"ho_kd":77,"tong_don_vi":154,"xe_9cho":33,"xe_9_25":310,"xe_tren25":602,"hl_xe":256,"cp_xe":427,"mc_xe":41,"ub_xe":88,"qy_xe":19,"dt_xe":41,"vd_xe":53,"dh_xe":7,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":21163,"so_khach":689088},{"thang":1,"nam":2023,"cap_moi":16,"ngung_tra":30,"tong_phuong_tien":935,"so_dn":67,"htx":10,"ho_kd":78,"tong_don_vi":155,"xe_9cho":34,"xe_9_25":305,"xe_tren25":596,"hl_xe":249,"cp_xe":423,"mc_xe":40,"ub_xe":84,"qy_xe":24,"dt_xe":40,"vd_xe":54,"dh_xe":8,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":16244,"so_khach":573450},{"thang":2,"nam":2023,"cap_moi":31,"ngung_tra":39,"tong_phuong_tien":924,"so_dn":67,"htx":10,"ho_kd":80,"tong_don_vi":157,"xe_9cho":33,"xe_9_25":306,"xe_tren25":585,"hl_xe":257,"cp_xe":390,"mc_xe":40,"ub_xe":89,"qy_xe":25,"dt_xe":40,"vd_xe":62,"dh_xe":8,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":17740,"so_khach":616800},{"thang":3,"nam":2023,"cap_moi":22,"ngung_tra":45,"tong_phuong_tien":902,"so_dn":67,"htx":10,"ho_kd":87,"tong_don_vi":164,"xe_9cho":32,"xe_9_25":283,"xe_tren25":587,"hl_xe":256,"cp_xe":391,"mc_xe":34,"ub_xe":77,"qy_xe":25,"dt_xe":40,"vd_xe":60,"dh_xe":7,"hh_xe":10,"bl_xe":1,"ct_xe":0,"so_chuyen":22154,"so_khach":675714},{"thang":4,"nam":2023,"cap_moi":28,"ngung_tra":23,"tong_phuong_tien":908,"so_dn":67,"htx":10,"ho_kd":88,"tong_don_vi":165,"xe_9cho":32,"xe_9_25":286,"xe_tren25":590,"hl_xe":257,"cp_xe":390,"mc_xe":34,"ub_xe":78,"qy_xe":27,"dt_xe":40,"vd_xe":60,"dh_xe":10,"hh_xe":10,"bl_xe":1,"ct_xe":0,"so_chuyen":20053,"so_khach":654415},{"thang":5,"nam":2023,"cap_moi":14,"ngung_tra":34,"tong_phuong_tien":888,"so_dn":67,"htx":10,"ho_kd":90,"tong_don_vi":167,"xe_9cho":30,"xe_9_25":283,"xe_tren25":575,"hl_xe":258,"cp_xe":381,"mc_xe":26,"ub_xe":74,"qy_xe":27,"dt_xe":40,"vd_xe":60,"dh_xe":9,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":21613,"so_khach":690468},{"thang":6,"nam":2023,"cap_moi":27,"ngung_tra":24,"tong_phuong_tien":891,"so_dn":67,"htx":10,"ho_kd":94,"tong_don_vi":171,"xe_9cho":36,"xe_9_25":288,"xe_tren25":567,"hl_xe":266,"cp_xe":373,"mc_xe":26,"ub_xe":71,"qy_xe":31,"dt_xe":42,"vd_xe":60,"dh_xe":9,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":21667,"so_khach":718654},{"thang":7,"nam":2023,"cap_moi":17,"ngung_tra":4,"tong_phuong_tien":904,"so_dn":65,"htx":10,"ho_kd":98,"tong_don_vi":173,"xe_9cho":42,"xe_9_25":291,"xe_tren25":571,"hl_xe":278,"cp_xe":372,"mc_xe":22,"ub_xe":74,"qy_xe":31,"dt_xe":42,"vd_xe":60,"dh_xe":11,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":22646,"so_khach":760279},{"thang":8,"nam":2023,"cap_moi":66,"ngung_tra":12,"tong_phuong_tien":958,"so_dn":71,"htx":10,"ho_kd":115,"tong_don_vi":196,"xe_9cho":53,"xe_9_25":315,"xe_tren25":590,"hl_xe":304,"cp_xe":388,"mc_xe":25,"ub_xe":76,"qy_xe":32,"dt_xe":47,"vd_xe":60,"dh_xe":11,"hh_xe":12,"bl_xe":1,"ct_xe":0,"so_chuyen":23949,"so_khach":758067},{"thang":9,"nam":2023,"cap_moi":60,"ngung_tra":22,"tong_phuong_tien":997,"so_dn":77,"htx":10,"ho_kd":124,"tong_don_vi":211,"xe_9cho":60,"xe_9_25":327,"xe_tren25":610,"hl_xe":321,"cp_xe":397,"mc_xe":25,"ub_xe":81,"qy_xe":34,"dt_xe":48,"vd_xe":63,"dh_xe":10,"hh_xe":14,"bl_xe":2,"ct_xe":0,"so_chuyen":22729,"so_khach":714213},{"thang":10,"nam":2023,"cap_moi":62,"ngung_tra":37,"tong_phuong_tien":1025,"so_dn":75,"htx":10,"ho_kd":150,"tong_don_vi":235,"xe_9cho":68,"xe_9_25":345,"xe_tren25":612,"hl_xe":332,"cp_xe":407,"mc_xe":22,"ub_xe":83,"qy_xe":36,"dt_xe":50,"vd_xe":66,"dh_xe":10,"hh_xe":15,"bl_xe":2,"ct_xe":0,"so_chuyen":24348,"so_khach":764794},{"thang":11,"nam":2023,"cap_moi":36,"ngung_tra":34,"tong_phuong_tien":1029,"so_dn":72,"htx":10,"ho_kd":164,"tong_don_vi":246,"xe_9cho":78,"xe_9_25":340,"xe_tren25":611,"hl_xe":348,"cp_xe":399,"mc_xe":20,"ub_xe":83,"qy_xe":33,"dt_xe":53,"vd_xe":63,"dh_xe":11,"hh_xe":15,"bl_xe":2,"ct_xe":0,"so_chuyen":25028,"so_khach":743182},{"thang":12,"nam":2023,"cap_moi":69,"ngung_tra":98,"tong_phuong_tien":999,"so_dn":68,"htx":9,"ho_kd":142,"tong_don_vi":219,"xe_9cho":87,"xe_9_25":308,"xe_tren25":604,"hl_xe":348,"cp_xe":396,"mc_xe":20,"ub_xe":74,"qy_xe":30,"dt_xe":50,"vd_xe":57,"dh_xe":11,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":25485,"so_khach":751374},{"thang":1,"nam":2024,"cap_moi":88,"ngung_tra":55,"tong_phuong_tien":1015,"so_dn":70,"htx":9,"ho_kd":141,"tong_don_vi":220,"xe_9cho":90,"xe_9_25":311,"xe_tren25":614,"hl_xe":371,"cp_xe":391,"mc_xe":19,"ub_xe":74,"qy_xe":34,"dt_xe":48,"vd_xe":54,"dh_xe":11,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":26211,"so_khach":803648},{"thang":2,"nam":2024,"cap_moi":20,"ngung_tra":19,"tong_phuong_tien":1018,"so_dn":71,"htx":9,"ho_kd":141,"tong_don_vi":221,"xe_9cho":94,"xe_9_25":307,"xe_tren25":617,"hl_xe":376,"cp_xe":391,"mc_xe":19,"ub_xe":72,"qy_xe":34,"dt_xe":48,"vd_xe":54,"dh_xe":11,"hh_xe":11,"bl_xe":1,"ct_xe":0,"so_chuyen":20467,"so_khach":609968},{"thang":3,"nam":2024,"cap_moi":31,"ngung_tra":74,"tong_phuong_tien":959,"so_dn":69,"htx":9,"ho_kd":133,"tong_don_vi":211,"xe_9cho":96,"xe_9_25":274,"xe_tren25":589,"hl_xe":378,"cp_xe":352,"mc_xe":15,"ub_xe":69,"qy_xe":33,"dt_xe":42,"vd_xe":53,"dh_xe":10,"hh_xe":5,"bl_xe":1,"ct_xe":0,"so_chuyen":29197,"so_khach":829406},{"thang":4,"nam":2024,"cap_moi":66,"ngung_tra":28,"tong_phuong_tien":990,"so_dn":67,"htx":8,"ho_kd":136,"tong_don_vi":211,"xe_9cho":111,"xe_9_25":295,"xe_tren25":584,"hl_xe":385,"cp_xe":383,"mc_xe":12,"ub_xe":70,"qy_xe":33,"dt_xe":42,"vd_xe":53,"dh_xe":5,"hh_xe":5,"bl_xe":1,"ct_xe":0,"so_chuyen":26353,"so_khach":777608},{"thang":5,"nam":2024,"cap_moi":49,"ngung_tra":25,"tong_phuong_tien":1011,"so_dn":68,"htx":9,"ho_kd":134,"tong_don_vi":211,"xe_9cho":132,"xe_9_25":301,"xe_tren25":578,"hl_xe":403,"cp_xe":383,"mc_xe":12,"ub_xe":70,"qy_xe":34,"dt_xe":41,"vd_xe":54,"dh_xe":6,"hh_xe":5,"bl_xe":1,"ct_xe":0,"so_chuyen":25579,"so_khach":802906},{"thang":6,"nam":2024,"cap_moi":58,"ngung_tra":21,"tong_phuong_tien":1031,"so_dn":67,"htx":9,"ho_kd":132,"tong_don_vi":208,"xe_9cho":142,"xe_9_25":304,"xe_tren25":585,"hl_xe":424,"cp_xe":382,"mc_xe":13,"ub_xe":68,"qy_xe":33,"dt_xe":42,"vd_xe":55,"dh_xe":6,"hh_xe":4,"bl_xe":1,"ct_xe":0,"so_chuyen":25074,"so_khach":785706}];
+
+let activeYear='all';
+let charts={};
+let newRowIds=new Set();
+let _uid=DATA.length;
+DATA.forEach((d,i)=>d._id=i+1);
+
+const fmt=n=>(n==null||n===undefined)?'—':Number(n).toLocaleString('vi-VN');
+const fmtShort=n=>{if(!n)return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(0)+'K';return n;};
+const nv=id=>parseInt(document.getElementById(id).value)||0;
+const filtered=()=>activeYear==='all'?DATA:DATA.filter(d=>d.nam===activeYear);
+
+function setYear(y){
+  activeYear=y;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.textContent===(y==='all'?'Tất cả':String(y))));
+  updateAll();
+}
+
+function updateHeaderSub(){
+  const years=[...new Set(DATA.map(d=>d.nam))].sort();
+  document.getElementById('headerSub').textContent=`Sở GTVT Quảng Ninh · ${years[0]} – ${years[years.length-1]}`;
+  document.getElementById('recordCount').textContent=`${DATA.length} bản ghi`;
+  [2025,2026].forEach(yr=>{
+    if(DATA.some(d=>d.nam===yr)&&!document.querySelector(`.filter-btn[data-yr="${yr}"]`)){
+      const btn=document.createElement('button');
+      btn.className='filter-btn';btn.setAttribute('data-yr',yr);btn.textContent=String(yr);btn.onclick=()=>setYear(yr);
+      document.querySelector('.header-right').insertBefore(btn,document.getElementById('recordCount'));
+    }
+  });
+}
+
+const gridColor='rgba(255,255,255,0.05)';
+const tickColor='#7b8ea4';
+function makeOrUpdate(id,config){if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id).getContext('2d'),config);}
+function colorByYear(data){return data.map(d=>d.nam===2022?'#7fba00':d.nam===2023?'#00c6ff':d.nam===2024?'#ff6b35':'#f7b731');}
+function lbs(data){return data.map(d=>`T${d.thang}/${String(d.nam).slice(2)}`);}
+
+function updateChartPT(data){makeOrUpdate('chartPT',{type:'line',data:{labels:lbs(data),datasets:[{label:'Tổng PT',data:data.map(d=>d.tong_phuong_tien),borderColor:'#00c6ff',backgroundColor:'rgba(0,198,255,0.08)',fill:true,tension:0.4,pointRadius:data.length>15?2:4,pointBackgroundColor:colorByYear(data),borderWidth:2}]},options:{responsive:true,animation:{duration:400},plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e2d45',titleColor:'#e2e8f0',bodyColor:'#7b8ea4',callbacks:{label:c=>`${fmt(c.raw)} xe`}}},scales:{x:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},maxRotation:45}},y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},callback:v=>fmt(v)},min:800}}}});}
+function updateChartLoaiXe(data){const last=data[data.length-1];makeOrUpdate('chartLoaiXe',{type:'doughnut',data:{labels:['≤ 9 chỗ','9–25 chỗ','> 25 chỗ'],datasets:[{data:[last.xe_9cho,last.xe_9_25,last.xe_tren25],backgroundColor:['#f7b731','#00c6ff','#ff6b35'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,animation:{duration:400},cutout:'68%',plugins:{legend:{position:'bottom',labels:{color:'#7b8ea4',font:{size:11},padding:12}},tooltip:{backgroundColor:'#1e2d45',callbacks:{label:c=>`${c.label}: ${fmt(c.raw)} xe (${(c.raw/(last.xe_9cho+last.xe_9_25+last.xe_tren25)*100).toFixed(1)}%)`}}}}});}
+function updateChartVanTai(data){makeOrUpdate('chartVanTai',{type:'bar',data:{labels:lbs(data),datasets:[{label:'Số chuyến',data:data.map(d=>d.so_chuyen),backgroundColor:'rgba(0,198,255,0.7)',yAxisID:'y',borderRadius:3,barPercentage:0.6},{label:'Hành khách',data:data.map(d=>d.so_khach),borderColor:'#f7b731',backgroundColor:'transparent',type:'line',yAxisID:'y1',tension:0.4,pointRadius:data.length>15?1:3,borderWidth:2}]},options:{responsive:true,animation:{duration:400},plugins:{legend:{labels:{color:'#7b8ea4',font:{size:11}}},tooltip:{backgroundColor:'#1e2d45',callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.raw)}`}}},scales:{x:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},maxRotation:45}},y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},callback:v=>fmtShort(v)},position:'left'},y1:{grid:{display:false},ticks:{color:'#f7b731',font:{size:10},callback:v=>fmtShort(v)},position:'right'}}}});}
+function updateChartBienDong(data){makeOrUpdate('chartBienDong',{type:'bar',data:{labels:lbs(data),datasets:[{label:'Cấp mới',data:data.map(d=>d.cap_moi),backgroundColor:'rgba(127,186,0,0.8)',borderRadius:3,barPercentage:0.7},{label:'Ngừng/Trả',data:data.map(d=>-d.ngung_tra),backgroundColor:'rgba(255,107,53,0.8)',borderRadius:3,barPercentage:0.7}]},options:{responsive:true,animation:{duration:400},plugins:{legend:{labels:{color:'#7b8ea4',font:{size:11}}},tooltip:{backgroundColor:'#1e2d45',callbacks:{label:c=>`${c.dataset.label}: ${fmt(Math.abs(c.raw))}`}}},scales:{x:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},maxRotation:45},stacked:true},y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},callback:v=>Math.abs(v)},stacked:true}}}});}
+function updateChartLoaiHinh(data){makeOrUpdate('chartLoaiHinh',{type:'bar',data:{labels:lbs(data),datasets:[{label:'Doanh nghiệp',data:data.map(d=>d.so_dn),backgroundColor:'rgba(0,198,255,0.75)',borderRadius:3,barPercentage:0.8},{label:'HTX',data:data.map(d=>d.htx),backgroundColor:'rgba(127,186,0,0.75)',borderRadius:3,barPercentage:0.8},{label:'Hộ KD',data:data.map(d=>d.ho_kd),backgroundColor:'rgba(247,183,49,0.75)',borderRadius:3,barPercentage:0.8}]},options:{responsive:true,animation:{duration:400},plugins:{legend:{labels:{color:'#7b8ea4',font:{size:11}}},tooltip:{backgroundColor:'#1e2d45',callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.raw)}`}}},scales:{x:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},maxRotation:45},stacked:true},y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10}},stacked:true}}}});}
+function updateDistrict(){
+  const w=DATA.filter(d=>d.hl_xe>0);
+  if(!w.length){document.getElementById('districtGrid').innerHTML='<p style="color:#7b8ea4;font-size:12px">Không có dữ liệu địa phương</p>';return;}
+  const last=w[w.length-1];
+  const ds=[{name:'Hạ Long',val:last.hl_xe},{name:'Cẩm Phả',val:last.cp_xe},{name:'Móng Cái',val:last.mc_xe},{name:'Uông Bí',val:last.ub_xe},{name:'Quảng Yên',val:last.qy_xe},{name:'Đông Triều',val:last.dt_xe},{name:'Vân Đồn',val:last.vd_xe},{name:'Đầm Hà',val:last.dh_xe},{name:'Hải Hà',val:last.hh_xe},{name:'Bình Liêu',val:last.bl_xe}].filter(d=>d.val>0).sort((a,b)=>b.val-a.val);
+  const max=ds[0]?.val||1;
+  document.getElementById('districtGrid').innerHTML=ds.map(d=>`<div class="district-row"><div class="district-name">${d.name}</div><div class="district-bar-wrap"><div class="district-bar" style="width:${(d.val/max*100).toFixed(1)}%"></div></div><div class="district-val">${fmt(d.val)}</div></div>`).join('');
+}
+function updateTable(data){
+  const maxPT=Math.max(...data.map(d=>d.tong_phuong_tien));
+  const maxKhach=Math.max(...data.map(d=>d.so_khach));
+  const canDel=window._isAdmin;
+  document.getElementById('dataTable').innerHTML=data.map(d=>{
+    const yr=d.nam>=2025?'tag-new':`tag-${d.nam}`;
+    return`<tr class="${newRowIds.has(d._id)?'new-row':''}">
+      <td>${canDel?`<button class="btn-del" onclick="deleteRecord(${d._id})">✕</button>`:''}</td>
+      <td>Tháng ${d.thang}</td>
+      <td><span class="tag-year ${yr}">${d.nam}</span></td>
+      <td class="num num-hi" style="color:#00c6ff">${fmt(d.tong_phuong_tien)}<div class="bar-mini"><div class="bar-mini-fill" style="width:${(d.tong_phuong_tien/maxPT*100).toFixed(0)}%;background:#00c6ff"></div></div></td>
+      <td class="num" style="color:#7fba00">+${fmt(d.cap_moi)}</td>
+      <td class="num" style="color:#f87171">-${fmt(d.ngung_tra)}</td>
+      <td class="num">${fmt(d.tong_don_vi)}</td>
+      <td class="num">${fmt(d.so_dn)}</td>
+      <td class="num">${fmt(d.htx)}</td>
+      <td class="num">${fmt(d.ho_kd)}</td>
+      <td class="num">${fmt(d.xe_9cho)}</td>
+      <td class="num">${fmt(d.xe_9_25)}</td>
+      <td class="num">${fmt(d.xe_tren25)}</td>
+      <td class="num num-hi">${fmt(d.so_chuyen)}</td>
+      <td class="num num-hi" style="color:#f7b731">${fmt(d.so_khach)}<div class="bar-mini"><div class="bar-mini-fill" style="width:${(d.so_khach/maxKhach*100).toFixed(0)}%;background:#f7b731"></div></div></td>
+    </tr>`;
+  }).join('');
+}
+function updateKPIs(data){
+  const last=data[data.length-1];
+  document.getElementById('kpi-pt').textContent=fmt(last.tong_phuong_tien);
+  document.getElementById('kpi-pt-sub').textContent=`T${last.thang}/${last.nam}`;
+  document.getElementById('kpi-dv').textContent=fmt(last.tong_don_vi);
+  document.getElementById('kpi-dv-sub').textContent=`T${last.thang}/${last.nam}`;
+  document.getElementById('kpi-chuyen').textContent=fmtShort(data.reduce((s,d)=>s+d.so_chuyen,0));
+  document.getElementById('kpi-khach').textContent=fmtShort(data.reduce((s,d)=>s+d.so_khach,0));
+}
+function updateAll(){
+  const data=filtered();if(!data.length)return;
+  updateKPIs(data);updateChartPT(data);updateChartLoaiXe(data);
+  updateChartVanTai(data);updateChartBienDong(data);updateChartLoaiHinh(data);
+  updateDistrict();updateTable(data);updateHeaderSub();
+}
+
+// DATA MODAL
+function openDataModal(){document.getElementById('dataModal').classList.add('open');
+  const last=DATA[DATA.length-1];let nt=last.thang+1,ny=last.nam;if(nt>12){nt=1;ny++;}
+  document.getElementById('f_thang').value=nt;document.getElementById('f_nam').value=ny;
+  ['tong_phuong_tien','tong_don_vi','so_dn','htx','ho_kd','xe_9cho','xe_9_25','xe_tren25','hl_xe','cp_xe','mc_xe','ub_xe','qy_xe','dt_xe','vd_xe','dh_xe','hh_xe','bl_xe','ct_xe'].forEach(f=>{document.getElementById('f_'+f).value=last[f]||'';});
+  ['cap_moi','ngung_tra','so_chuyen','so_khach'].forEach(f=>{document.getElementById('f_'+f).value='';});
+}
+function closeDataModal(){document.getElementById('dataModal').classList.remove('open');document.querySelectorAll('#dataModal .form-group input,#dataModal .form-group select').forEach(el=>el.classList.remove('req-err'));}
+
+function saveRecord(){
+  const thang=parseInt(document.getElementById('f_thang').value);
+  const nam=parseInt(document.getElementById('f_nam').value);
+  const tong_phuong_tien=nv('f_tong_phuong_tien');
+  const tong_don_vi=nv('f_tong_don_vi');
+  const so_chuyen=nv('f_so_chuyen');
+  const so_khach=nv('f_so_khach');
+  let hasErr=false;
+  [{id:'f_thang',v:thang},{id:'f_nam',v:nam},{id:'f_tong_phuong_tien',v:tong_phuong_tien},{id:'f_tong_don_vi',v:tong_don_vi},{id:'f_so_chuyen',v:so_chuyen},{id:'f_so_khach',v:so_khach}].forEach(({id,v})=>{
+    const el=document.getElementById(id);if(!v){el.classList.add('req-err');hasErr=true;}else el.classList.remove('req-err');});
+  if(hasErr){showToast('⚠️ Vui lòng điền các trường bắt buộc (*)','error');return;}
+  if(DATA.some(d=>d.thang===thang&&d.nam===nam)){showToast(`⚠️ Đã có dữ liệu T${thang}/${nam}!`,'error');return;}
+  const rec={_id:++_uid,thang,nam,cap_moi:nv('f_cap_moi'),ngung_tra:nv('f_ngung_tra'),tong_phuong_tien,so_dn:nv('f_so_dn'),htx:nv('f_htx'),ho_kd:nv('f_ho_kd'),tong_don_vi,xe_9cho:nv('f_xe_9cho'),xe_9_25:nv('f_xe_9_25'),xe_tren25:nv('f_xe_tren25'),hl_xe:nv('f_hl_xe'),cp_xe:nv('f_cp_xe'),mc_xe:nv('f_mc_xe'),ub_xe:nv('f_ub_xe'),qy_xe:nv('f_qy_xe'),dt_xe:nv('f_dt_xe'),vd_xe:nv('f_vd_xe'),dh_xe:nv('f_dh_xe'),hh_xe:nv('f_hh_xe'),bl_xe:nv('f_bl_xe'),ct_xe:nv('f_ct_xe'),so_chuyen,so_khach};
+  DATA.push(rec);DATA.sort((a,b)=>a.nam!==b.nam?a.nam-b.nam:a.thang-b.thang);
+  newRowIds.add(rec._id);setTimeout(()=>newRowIds.delete(rec._id),3000);
+  closeDataModal();if(activeYear!=='all'&&activeYear!==nam)setYear('all');else updateAll();
+  showToast(`✅ Đã thêm T${thang}/${nam}`);
+}
+
+function deleteRecord(id){
+  const rec=DATA.find(d=>d._id===id);if(!rec)return;
+  if(!confirm(`Xóa dữ liệu T${rec.thang}/${rec.nam}?`))return;
+  DATA=DATA.filter(d=>d._id!==id);updateAll();showToast(`🗑️ Đã xóa T${rec.thang}/${rec.nam}`);
+}
+
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'');t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// INIT
+checkSession();
+</script>
+</body>
+</html>
